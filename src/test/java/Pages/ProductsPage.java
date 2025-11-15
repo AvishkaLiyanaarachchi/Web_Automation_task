@@ -23,6 +23,8 @@ public class ProductsPage {
     By backtoHome = By.id("back-to-products");
     By menuIcon = By.id("react-burger-menu-btn");
     By logoutBtn = By.xpath("//*[@id=\"logout_sidebar_link\"]");
+    By removeBtn = By.xpath("//*[@id=\"remove-sauce-labs-backpack\"]");
+    By continueShoppingBtn = By.xpath("co//*[@id=\"continue-shopping\"]");
 
     WebDriver driver;
 
@@ -46,15 +48,15 @@ public class ProductsPage {
             Select select = new Select(filterOption);//Create select object to visible dynamic dropdown values
             select.selectByValue("za");
             ProductsPage.timeout2000();
-            select.selectByValue("az");
-            ProductsPage.timeout2000();
 
             try{
                 WebElement selectOption = select.getFirstSelectedOption();
                 String val = selectOption.getText();
                 System.out.println(val);
 
-                Assert.assertTrue(true, "Name filter with Z to A");
+                if(val.isEmpty()) {
+                    Assert.assertFalse(true, "Not filtering products with Z to A");
+                }
             }catch (Exception ex){
                 System.out.println(ex);
             }
@@ -95,50 +97,134 @@ public class ProductsPage {
         }
     }
 
-    public boolean checkout_product_under_cart_section(String fname, String lname, String postalcodeVal){
+    public boolean remove_item_from_cart(){
         boolean status = true;
-
-        try {
-            driver.findElement(checkoutBtn).click();
+        try{
             ProductsPage.timeout2000();
-
-            //Create Soft assertion object and call assetTrue, assertFalse, assertEquals method to verify conditions
-            //If condition is not met, execute other conditions
-            SoftAssert soft = new SoftAssert();
-            if(driver.findElement(firstName).isDisplayed()){
-                soft.assertTrue(true, "Display enter fields for your information");
-            }else{
-                soft.assertFalse(true,"Not display enter fields for your information");
+            if(driver.findElement(By.xpath("//div[@class ='cart_quantity']")).isDisplayed()){
+                driver.findElement(removeBtn).click();
+                ProductsPage.timeout2000();
             }
 
-            driver.findElement(continueBtn).click();
-            ProductsPage.timeout2000();
 
-            if(driver.findElement(By.xpath("//*[@id=\"checkout_info_container\"]/div/form/div[1]/div[4]")).isDisplayed()){
-                soft.assertTrue(true, "Display error message for required fields");
-            }else{
-                soft.assertFalse(true, "Not display error message for required fields");
+            try{
+                WebElement ele = driver.findElement(By.xpath("//*[@id=\"cart_contents_container\"]/div/div[1]/div[3]/div[1]"));
+                String val = ele.getText();
+                System.out.println(val);
+
+                if(val.isEmpty()){
+                    Assert.assertEquals(true,true,"There are no item display under cart section after deleing");
+                }else{
+                    Assert.assertEquals(true,false,"There are some item display under cart section after deleing");
+                }
+            }catch (Exception ex){
+                System.out.println(ex);
             }
-
-            driver.findElement(firstName).sendKeys(fname);
-            ProductsPage.timeout2000();
-            driver.findElement(lastName).sendKeys(lname);
-            ProductsPage.timeout2000();
-            driver.findElement(postalcode).sendKeys(postalcodeVal);
-            ProductsPage.timeout2000();
-            driver.findElement(continueBtn).click();
-            ProductsPage.timeout2000();
-
-            if(driver.findElement(By.xpath("//*[@id=\"checkout_summary_container\"]/div/div[2]/div[2]")).isDisplayed() && driver.findElement(By.xpath("//*[@id=\"checkout_summary_container\"]/div/div[2]/div[4]")).isDisplayed()){
-                soft.assertTrue(true,"Display checkout overview details");
-            }else{
-                soft.assertFalse(true,"Not display checkout overview details");
-            }
-            soft.assertAll(); //Generate error messages for fail test scripts in console
 
             status = true;
             return status;
         }catch (Exception ex){
+            System.out.println(ex);
+            Assert.assertFalse(true,"Test Failed:- This method fail and go through exception");
+            status= false;
+            return status;
+        }
+    }
+
+    public boolean checkout_product_under_cart_section(String fname, String lname, String postalcodeVal){
+        boolean status = true;
+
+        try {
+            //if already selected product display under cart section, execute if condition othervise move to else condition.
+            if(driver.findElement(By.xpath("//*[@id=\"cart_contents_container\"]/div/div[1]/div[3]/div[1]")).isDisplayed()) {
+                driver.findElement(checkoutBtn).click();
+                ProductsPage.timeout2000();
+
+                //Create Soft assertion object and call assetTrue, assertFalse, assertEquals method to verify conditions
+                //If condition is not met, execute other conditions
+                SoftAssert soft = new SoftAssert();
+                if (driver.findElement(firstName).isDisplayed()) {
+                    soft.assertTrue(true, "Display enter fields for your information");
+                } else {
+                    soft.assertFalse(true, "Not display enter fields for your information");
+                }
+
+                driver.findElement(continueBtn).click();
+                ProductsPage.timeout2000();
+
+                if (driver.findElement(By.xpath("//*[@id=\"checkout_info_container\"]/div/form/div[1]/div[4]")).isDisplayed()) {
+                    soft.assertTrue(true, "Display error message for required fields");
+                } else {
+                    soft.assertFalse(true, "Not display error message for required fields");
+                }
+
+                driver.findElement(firstName).sendKeys(fname);
+                ProductsPage.timeout2000();
+                driver.findElement(lastName).sendKeys(lname);
+                ProductsPage.timeout2000();
+                driver.findElement(postalcode).sendKeys(postalcodeVal);
+                ProductsPage.timeout2000();
+                driver.findElement(continueBtn).click();
+                ProductsPage.timeout2000();
+
+                if (driver.findElement(By.xpath("//*[@id=\"checkout_summary_container\"]/div/div[2]/div[2]")).isDisplayed() && driver.findElement(By.xpath("//*[@id=\"checkout_summary_container\"]/div/div[2]/div[4]")).isDisplayed()) {
+                    soft.assertTrue(true, "Display checkout overview details");
+                } else {
+                    soft.assertFalse(true, "Not display checkout overview details");
+                }
+                soft.assertAll(); //Generate error messages for fail test scripts in console
+
+
+            }else{
+                driver.findElement(continueShoppingBtn).click();
+                ProductsPage.timeout2000();
+                driver.findElement(addtoCartOption).click();
+                ProductsPage.timeout2000();
+                driver.findElement(cartIcon).click();
+                ProductsPage.timeout2000();
+
+                driver.findElement(checkoutBtn).click();
+                ProductsPage.timeout2000();
+                //Create Soft assertion object and call assetTrue, assertFalse, assertEquals method to verify conditions
+                //If condition is not met, execute other conditions
+                SoftAssert soft = new SoftAssert();
+                if (driver.findElement(firstName).isDisplayed()) {
+                    soft.assertTrue(true, "Display enter fields for your information");
+                } else {
+                    soft.assertFalse(true, "Not display enter fields for your information");
+                }
+
+                driver.findElement(continueBtn).click();
+                ProductsPage.timeout2000();
+
+                if (driver.findElement(By.xpath("//*[@id=\"checkout_info_container\"]/div/form/div[1]/div[4]")).isDisplayed()) {
+                    soft.assertTrue(true, "Display error message for required fields");
+                } else {
+                    soft.assertFalse(true, "Not display error message for required fields");
+                }
+
+                driver.findElement(firstName).sendKeys(fname);
+                ProductsPage.timeout2000();
+                driver.findElement(lastName).sendKeys(lname);
+                ProductsPage.timeout2000();
+                driver.findElement(postalcode).sendKeys(postalcodeVal);
+                ProductsPage.timeout2000();
+                driver.findElement(continueBtn).click();
+                ProductsPage.timeout2000();
+
+                if (driver.findElement(By.xpath("//*[@id=\"checkout_summary_container\"]/div/div[2]/div[2]")).isDisplayed() && driver.findElement(By.xpath("//*[@id=\"checkout_summary_container\"]/div/div[2]/div[4]")).isDisplayed()) {
+                    soft.assertTrue(true, "Display checkout overview details");
+                } else {
+                    soft.assertFalse(true, "Not display checkout overview details");
+                }
+                soft.assertAll(); //Generate error messages for fail test scripts in console
+
+            }
+
+            status = true;
+            return status;
+        }catch (Exception ex){
+            Assert.assertFalse(true,"Test Failed:- This method fail and go through exception");
             status = false;
             return status;
         }
@@ -168,6 +254,7 @@ public class ProductsPage {
             status = true;
             return status;
         }catch (Exception ex){
+            Assert.assertFalse(true,"Test Failed:- This method fail and go through exception");
             status = false;
             return status;
         }

@@ -6,17 +6,22 @@ import com.relevantcodes.extentreports.ExtentReports;
 import com.relevantcodes.extentreports.ExtentTest;
 import com.relevantcodes.extentreports.LogStatus;
 import io.github.bonigarcia.wdm.WebDriverManager;
+import org.bouncycastle.oer.its.ieee1609dot2.basetypes.Duration;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.edge.EdgeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.testng.Assert;
 import org.testng.ITestResult;
 import org.testng.annotations.*;
 import org.testng.asserts.SoftAssert;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class TestRunnerFile {
@@ -52,12 +57,23 @@ public class TestRunnerFile {
         test = report.startTest("Product Dashboard");
     }
 
+
     @BeforeClass
     public void beforeClass() {
         try{
             WebDriverManager.chromedriver().setup();//Setup the chrome driver
+
+            // Create a HashMap to store Chrome preferences
+            //This method used to handle change password popup in browser
+            Map<String, Object> prefs = new HashMap<>();
+            prefs.put("credentials_enable_service", false);
+            prefs.put("profile.password_manager_enabled", false);
+            prefs.put("profile.password_manager_leak_detection", false); // Crucial for "Change your password" popup
+
             ChromeOptions options = new ChromeOptions();
-            options.addArguments("--incognito"); // Add the incognito argument
+            options.setExperimentalOption("prefs",prefs);
+
+//            options.addArguments("--incognito"); // Add the incognito argument
             driver = new ChromeDriver(options);
             driver.get("https://www.saucedemo.com/");//Give the URL
             driver.manage().window().maximize();
@@ -176,6 +192,24 @@ public class TestRunnerFile {
     }
 
     @Test(priority = 5)
+    public void test_remove_product_from_add_to_cart() {
+        total_count++;
+        try {
+            product = new ProductsPage(driver);
+            boolean status = product.remove_item_from_cart();
+            if(status == true){
+                pass_count++;
+                Assert.assertEquals(true, pass_method_list.add("remove_item_from_cart()"));
+            }else{
+                fail_count++;
+                Assert.assertEquals(true, fail_method_list.add("remove_item_from_cart()"));
+            }
+        }catch (Exception ex){
+            System.out.println(ex);
+        }
+    }
+
+    @Test(priority = 6)
     public void test_checkout_product_under_cart_section() {
         total_count ++;
         try{
@@ -199,7 +233,7 @@ public class TestRunnerFile {
         }
     }
 
-    @Test(priority = 6)
+    @Test(priority = 7)
     public void test_logout_option_from_system() {
         total_count ++;
         try{

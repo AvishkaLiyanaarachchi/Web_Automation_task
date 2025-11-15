@@ -8,6 +8,8 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.testng.Assert;
 
+import java.util.concurrent.TimeUnit;
+
 
 public class LoginPage {
 
@@ -39,11 +41,13 @@ public class LoginPage {
         boolean status = true;
         try {
             username.sendKeys(inuname);//Send text to the input field
-            LoginPage.timeout2000(); //wait two second to interact other web element
+            driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);//wait two second to interact other web element
             password.sendKeys(inpass);
-            LoginPage.timeout2000();
+            driver.manage().timeouts().implicitlyWait(2,TimeUnit.SECONDS);
+            //LoginPage.timeout2000();
             loginBtn.click(); //Click button
-            LoginPage.timeout2000();
+            //LoginPage.timeout2000();
+            driver.manage().timeouts().implicitlyWait(2,TimeUnit.SECONDS);
 
             try {
                 //assertion message to verify condition
